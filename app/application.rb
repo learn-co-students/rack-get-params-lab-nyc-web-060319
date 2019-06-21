@@ -1,6 +1,10 @@
+require "pry"
+
 class Application
 
   @@items = ["Apples","Carrots","Pears"]
+  @@cart = []
+
 
   def call(env)
     resp = Rack::Response.new
@@ -13,6 +17,22 @@ class Application
     elsif req.path.match(/search/)
       search_term = req.params["q"]
       resp.write handle_search(search_term)
+    elsif req.path.match(/cart/)
+      if @@cart.length > 0
+        cart_str = @@cart.join("\n")
+        resp.write(cart_str)        
+      else
+        resp.write("Your cart is empty")
+      end
+    elsif req.path.match(/add/)
+      items_to_add = req.params['item']
+      if @@items.include?(items_to_add)
+        @@cart << items_to_add
+        resp.write("added #{items_to_add}")
+      else
+        resp.write("We don't have that item")
+      end
+      # binding.pry
     else
       resp.write "Path Not Found"
     end
